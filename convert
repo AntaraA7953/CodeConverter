@@ -1,0 +1,47 @@
+import React, { useState } from 'react';
+import { CopilotKit, ProvideApiKeyDialog, CopilotPopup } from 'copilot-kit';
+import { TasksProvider, TasksList } from './tasks';
+import { convertDesignToCode } from './api';  // Backend API for design to code conversion
+
+const App = () => {
+  const [publicApiKey, setPublicApiKey] = useState('<your-api-key>');
+  const [uploadedDesign, setUploadedDesign] = useState(null);
+  const [generatedCode, setGeneratedCode] = useState('');
+
+  const handleDesignUpload = async (file) => {
+    setUploadedDesign(file);
+    const code = await convertDesignToCode(file); // Calls API to convert design to HTML/CSS
+    setGeneratedCode(code);
+  };
+
+  return (
+    <CopilotKit publicApiKey={publicApiKey || "undefined"}>
+      <>
+        {/* Provide API Key Dialog */}
+        <ProvideApiKeyDialog />
+
+        {/* Main CopilotKit for task automation */}
+        <TasksProvider>
+          <TasksList />
+          <div className="design-upload-section">
+            <h2>Upload Your UI/UX Design</h2>
+            <input type="file" onChange={(e) => handleDesignUpload(e.target.files[0])} />
+          </div>
+
+          {/* Generated HTML/CSS Code Output */}
+          {generatedCode && (
+            <div className="generated-code-section">
+              <h2>Generated HTML/CSS Code</h2>
+              <pre>{generatedCode}</pre>
+            </div>
+          )}
+        </TasksProvider>
+
+        {/* Popup for Copilot Task Interactions */}
+        <CopilotPopup />
+      </>
+    </CopilotKit>
+  );
+};
+
+export default App;
